@@ -9,6 +9,7 @@ import { ShoppingCart, PackagePlus, ArrowRight, TrendingUp, TrendingDown, Wallet
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useFocusEffect } from 'expo-router';
+import Accordion from '../src/components/Accordion';
 
 export default function DashboardScreen() {
     const db = useSQLiteContext();
@@ -179,87 +180,103 @@ export default function DashboardScreen() {
 
     const InventorySection = (
         <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Inventario</Text>
-                <TouchableOpacity style={styles.miniFab} onPress={() => { resetInventoryForm(); setInventoryModalVisible(true); }}>
-                    <Plus color="white" size={18} />
-                </TouchableOpacity>
-            </View>
-            <View style={styles.card}>
-                {products.map((item) => (
-                    <View key={item.id} style={styles.productRow}>
-                        <View style={{ flex: 1 }}>
-                            <Text style={styles.productName}>{item.name}</Text>
-                            <Text style={styles.productInfo}>Stk: {item.stock} | ${item.sellPrice}</Text>
+            <Accordion 
+                title="Inventario" 
+                icon={<Package color="#2563eb" size={20} />}
+                initialExpanded={isWide}
+            >
+                <View style={styles.sectionHeaderInside}>
+                    <Text style={styles.sectionSubtitle}>Gestionar Productos</Text>
+                    <TouchableOpacity style={styles.miniFab} onPress={() => { resetInventoryForm(); setInventoryModalVisible(true); }}>
+                        <Plus color="white" size={18} />
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.cardInternal}>
+                    {products.map((item) => (
+                        <View key={item.id} style={styles.productRow}>
+                            <View style={{ flex: 1 }}>
+                                <Text style={styles.productName}>{item.name}</Text>
+                                <Text style={styles.productInfo}>Stk: {item.stock} | ${item.sellPrice}</Text>
+                            </View>
+                            <TouchableOpacity onPress={() => handleEditProduct(item)} style={{ marginRight: 10 }}>
+                                <Edit2 color="#64748b" size={16} />
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => handleDeleteProduct(item.id)}>
+                                <Trash2 color="#ef4444" size={16} />
+                            </TouchableOpacity>
                         </View>
-                        <TouchableOpacity onPress={() => handleEditProduct(item)} style={{ marginRight: 10 }}>
-                            <Edit2 color="#64748b" size={16} />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => handleDeleteProduct(item.id)}>
-                            <Trash2 color="#ef4444" size={16} />
-                        </TouchableOpacity>
-                    </View>
-                ))}
-                {products.length === 0 && <Text style={styles.empty}>Sin productos</Text>}
-            </View>
+                    ))}
+                    {products.length === 0 && <Text style={styles.empty}>Sin productos</Text>}
+                </View>
+            </Accordion>
         </View>
     );
 
     const POSSection = (
         <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Punto de Venta</Text>
-            <View style={styles.card}>
-                <View style={styles.typeSelector}>
-                    <TouchableOpacity style={[styles.typeBtn, posType === 'sell' && styles.sellActive]} onPress={() => setPosType('sell')}>
-                        <ShoppingCart color={posType === 'sell' ? 'white' : '#64748b'} size={16} />
-                        <Text style={[styles.typeBtnText, posType === 'sell' && styles.textWhite]}>Venta</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.typeBtn, posType === 'buy' && styles.buyActive]} onPress={() => setPosType('buy')}>
-                        <PackagePlus color={posType === 'buy' ? 'white' : '#64748b'} size={16} />
-                        <Text style={[styles.typeBtnText, posType === 'buy' && styles.textWhite]}>Compra</Text>
+            <Accordion 
+                title="Punto de Venta" 
+                icon={<ShoppingCart color="#2563eb" size={20} />}
+                initialExpanded={isWide}
+            >
+                <View style={styles.cardInternal}>
+                    <View style={styles.typeSelector}>
+                        <TouchableOpacity style={[styles.typeBtn, posType === 'sell' && styles.sellActive]} onPress={() => setPosType('sell')}>
+                            <ShoppingCart color={posType === 'sell' ? 'white' : '#64748b'} size={16} />
+                            <Text style={[styles.typeBtnText, posType === 'sell' && styles.textWhite]}>Venta</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[styles.typeBtn, posType === 'buy' && styles.buyActive]} onPress={() => setPosType('buy')}>
+                            <PackagePlus color={posType === 'buy' ? 'white' : '#64748b'} size={16} />
+                            <Text style={[styles.typeBtnText, posType === 'buy' && styles.textWhite]}>Compra</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <TextInput style={styles.input} placeholder="¿Qué buscas?" value={posProductName} onChangeText={setPosProductName} />
+                    <TextInput style={styles.input} placeholder="Cantidad" value={posQuantity} onChangeText={setPosQuantity} keyboardType="numeric" />
+                    <TouchableOpacity style={styles.submitBtn} onPress={handlePOSSubmit}>
+                        <Text style={styles.submitBtnText}>Registrar</Text>
+                        <ArrowRight color="white" size={16} />
                     </TouchableOpacity>
                 </View>
-                <TextInput style={styles.input} placeholder="¿Qué buscas?" value={posProductName} onChangeText={setPosProductName} />
-                <TextInput style={styles.input} placeholder="Cantidad" value={posQuantity} onChangeText={setPosQuantity} keyboardType="numeric" />
-                <TouchableOpacity style={styles.submitBtn} onPress={handlePOSSubmit}>
-                    <Text style={styles.submitBtnText}>Registrar</Text>
-                    <ArrowRight color="white" size={16} />
-                </TouchableOpacity>
-            </View>
+            </Accordion>
         </View>
     );
 
     const HistorySection = (
         <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Hoy</Text>
-            <View style={styles.summaryCard}>
-                <View style={styles.statsRow}>
-                    <View style={{ flex: 1 }}>
-                        <Text style={styles.statLabel}>Ventas</Text>
-                        <Text style={[styles.statValue, styles.salesText]}>+${totals.sales.toFixed(2)}</Text>
+            <Accordion 
+                title="Historial de Hoy" 
+                icon={<Clock color="#2563eb" size={20} />}
+                initialExpanded={isWide}
+            >
+                <View style={styles.summaryCard}>
+                    <View style={styles.statsRow}>
+                        <View style={{ flex: 1 }}>
+                            <Text style={styles.statLabel}>Ventas</Text>
+                            <Text style={[styles.statValue, styles.salesText]}>+${totals.sales.toFixed(2)}</Text>
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={styles.statLabel}>Compras</Text>
+                            <Text style={[styles.statValue, styles.purchasesText]}>-${totals.purchases.toFixed(2)}</Text>
+                        </View>
                     </View>
-                    <View style={{ flex: 1 }}>
-                        <Text style={styles.statLabel}>Compras</Text>
-                        <Text style={[styles.statValue, styles.purchasesText]}>-${totals.purchases.toFixed(2)}</Text>
+                    <View style={styles.balanceRow}>
+                        <Text style={styles.balanceLabel}>Neto:</Text>
+                        <Text style={styles.balanceValue}>${(totals.sales - totals.purchases).toFixed(2)}</Text>
                     </View>
                 </View>
-                <View style={styles.balanceRow}>
-                    <Text style={styles.balanceLabel}>Neto:</Text>
-                    <Text style={styles.balanceValue}>${(totals.sales - totals.purchases).toFixed(2)}</Text>
+                <View style={styles.cardInternal}>
+                    {transactions.map((item) => (
+                        <View key={item.id} style={styles.transRow}>
+                            <View style={[styles.dot, { backgroundColor: item.type === 'sell' ? '#10b981' : '#f59e0b' }]} />
+                            <Text style={styles.historyName}>{item.productName}</Text>
+                            <Text style={[styles.historyPrice, { color: item.type === 'sell' ? '#10b981' : '#f59e0b' }]}>
+                                {item.type === 'sell' ? '+' : '-'}${item.totalPrice.toFixed(2)}
+                            </Text>
+                        </View>
+                    ))}
+                    {transactions.length === 0 && <Text style={styles.empty}>Sin historial</Text>}
                 </View>
-            </View>
-            <View style={styles.card}>
-                {transactions.map((item) => (
-                    <View key={item.id} style={styles.transRow}>
-                        <View style={[styles.dot, { backgroundColor: item.type === 'sell' ? '#10b981' : '#f59e0b' }]} />
-                        <Text style={styles.historyName}>{item.productName}</Text>
-                        <Text style={[styles.historyPrice, { color: item.type === 'sell' ? '#10b981' : '#f59e0b' }]}>
-                            {item.type === 'sell' ? '+' : '-'}${item.totalPrice.toFixed(2)}
-                        </Text>
-                    </View>
-                ))}
-                {transactions.length === 0 && <Text style={styles.empty}>Sin historial</Text>}
-            </View>
+            </Accordion>
         </View>
     );
 
@@ -301,12 +318,15 @@ const styles = StyleSheet.create({
     col: { flexDirection: 'column', gap: 15 },
     section: { flex: 1 },
     sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+    sectionHeaderInside: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, marginTop: 4 },
     sectionTitle: { fontSize: 15, fontWeight: '700', color: '#334155', textTransform: 'uppercase' },
+    sectionSubtitle: { fontSize: 13, fontWeight: '600', color: '#64748b' },
     card: { backgroundColor: 'white', borderRadius: 10, padding: 12, elevation: 1 },
+    cardInternal: { backgroundColor: '#f8fafc', borderRadius: 8, padding: 8, borderWidth: 1, borderColor: '#f1f5f9' },
     productRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' },
     productName: { fontSize: 13, fontWeight: '600', color: '#1e293b' },
     productInfo: { fontSize: 11, color: '#64748b' },
-    miniFab: { backgroundColor: '#2563eb', padding: 5, borderRadius: 5 },
+    miniFab: { backgroundColor: '#2563eb', padding: 6, borderRadius: 8, elevation: 2 },
     typeSelector: { flexDirection: 'row', gap: 5, marginBottom: 10 },
     typeBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 8, borderRadius: 6, backgroundColor: '#f1f5f9', gap: 5 },
     sellActive: { backgroundColor: '#10b981' },
