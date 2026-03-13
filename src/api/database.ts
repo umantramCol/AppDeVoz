@@ -3,9 +3,7 @@ import { Product, Transaction, TransactionType } from '../types';
 
 const dbName = 'inventory_pos.db';
 
-export const initDatabase = async () => {
-    const db = await SQLite.openDatabaseAsync(dbName);
-
+export const initDatabase = async (db: SQLite.SQLiteDatabase) => {
     await db.execAsync(`
         PRAGMA journal_mode = WAL;
         CREATE TABLE IF NOT EXISTS products (
@@ -25,8 +23,6 @@ export const initDatabase = async () => {
             FOREIGN KEY (productId) REFERENCES products (id)
         );
     `);
-
-    return db;
 };
 
 export const getProducts = async (db: SQLite.SQLiteDatabase): Promise<Product[]> => {
@@ -75,7 +71,7 @@ export const getDailyTransactions = async (db: SQLite.SQLiteDatabase, date: stri
         SELECT t.*, p.name as productName 
         FROM transactions t
         JOIN products p ON t.productId = p.id
-        WHERE date(t.date) = ?
+        WHERE date(t.date, 'localtime') = ?
         ORDER BY t.date DESC
     `, [date]);
 };

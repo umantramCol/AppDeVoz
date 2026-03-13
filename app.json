@@ -13,6 +13,7 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
+      "bundleIdentifier": "com.umantram.appdevoz",
       "supportsTablet": true,
       "infoPlist": {
         "NSSpeechRecognitionUsageDescription": "Esta app usa reconocimiento de voz para registrar ventas y compras.",
@@ -20,6 +21,7 @@
       }
     },
     "android": {
+      "package": "com.umantram.appdevoz",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -31,6 +33,7 @@
       ],
       "predictiveBackGestureEnabled": false
     },
+    "newArchEnabled": false,
     "web": {
       "favicon": "./assets/favicon.png"
     },
